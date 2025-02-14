@@ -22,3 +22,7 @@ tareas = [
 @app.get("/", tags=['Inicio'])
 def main():
     return {"message": "¡Bienvenido a la API de Gestión de Tareas!"}
+
+@app.get("/tareas", tags=['Operaciones CRUD'])
+def obtener_todas_las_tareas():
+    return {'Tareas Registradas': tareas}
