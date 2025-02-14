@@ -1,0 +1,24 @@
+#librerias
+from fastapi import FastAPI, HTTPException
+from typing import Optional, List
+
+app = FastAPI(
+    title="API de Gestión de Tareas",
+    description="Gestión de tareas académicas para Ingeniería en Sistemas Computacionales",
+    version="1.0.0"
+)
+
+# base de datos simulada
+tareas = [
+    {"id": 1, "titulo": "Estudiar para el examen", "descripcion": "Repasar los apuntes de TAI", "vencimiento": "2024-02-14", "estado": "completada", "profesor": "Isay"},
+    {"id": 2, "titulo": "Investigar sobre IA", "descripcion": "Leer sobre redes neuronales", "vencimiento": "2024-02-18", "estado": "no completada", "profesor": "Javier"},
+    {"id": 3, "titulo": "Desarrollar API REST", "descripcion": "Crear endpoints en FastAPI", "vencimiento": "2024-02-20", "estado": "no completada", "profesor": "Cecilia"},
+    {"id": 4, "titulo": "Terminar proyecto de software", "descripcion": "Finalizar código del sistema de gestión", "vencimiento": "2024-02-25", "estado": "completada", "profesor": "Julio"},
+    {"id": 5, "titulo": "Leer sobre estructuras de datos", "descripcion": "Revisar listas, pilas y colas", "vencimiento": "2024-03-02", "estado": "no completada", "profesor": "Isay"},
+    {"id": 6, "titulo": "Resolver ejercicios de lógica", "descripcion": "Practicar problemas de programación competitiva", "vencimiento": "2024-03-05", "estado": "completada", "profesor": "Javier"},
+    {"id": 7, "titulo": "Aprender FastAPI", "descripcion": "Ver tutoriales y practicar", "vencimiento": "2024-03-10", "estado": "no completada", "profesor": "Cecilia"}
+]
+
+@app.get("/", tags=['Inicio'])
+def main():
+    return {"message": "¡Bienvenido a la API de Gestión de Tareas!"}
