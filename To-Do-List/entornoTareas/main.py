@@ -26,3 +26,10 @@ def main():
 @app.get("/tareas", tags=['Operaciones CRUD'])
 def obtener_todas_las_tareas():
     return {'Tareas Registradas': tareas}
+
+@app.get("/tareas/{id}", tags=['Operaciones CRUD'])
+def obtener_tarea(id: int):
+    for tarea in tareas:
+        if tarea["id"] == id:
+            return tarea
+    raise HTTPException(status_code=404, detail="Tarea no encontrada")
