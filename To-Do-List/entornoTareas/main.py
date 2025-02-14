@@ -55,6 +55,7 @@ def actualizar_tarea(id: int, tarea_actualizada: dict):
             return tareas[index]
     raise HTTPException(status_code=404, detail="Tarea no encontrada")
 
+#endpoint eliminar una tarea
 @app.delete("/tareas/{id}", tags=['Operaciones CRUD'])
 def eliminar_tarea(id: int):
     for index, tarea in enumerate(tareas):
