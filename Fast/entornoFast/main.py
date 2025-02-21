@@ -1,16 +1,25 @@
 from fastapi import FastAPI,HTTPException
-from typing import Optional # define para que los caracteres en las api sean opcionales o no
+from typing import Optional,List # define para que los caracteres en las api sean opcionales o no
+from pydantic import BaseModel
+
 
 app = FastAPI(
     title="Mi primera API",
     description="Blanca estela medina nieves",
     version="1.0.1"
 )
+
+class modelUsuario(BaseModel):
+    id: int
+    nombre: str
+    edad: int
+    correo: str
+    
 usuarios=[
-    {"id":1, "nombre":"estela", "edad":22},
-    {"id":2, "nombre":"Carlos", "edad":20},
-    {"id":3, "nombre":"jose", "edad":21},
-    {"id":4, "nombre":"mario", "edad":22},
+    {"id":1, "nombre":"estela", "edad":22, "correo":"estela123@gmail.com"},
+    {"id":2, "nombre":"Carlos", "edad":20, "correo":"charly34@gmail.com"},
+    {"id":3, "nombre":"jose", "edad":21, "correo":"jose13@gmail.com"},
+    {"id":4, "nombre":"mario", "edad":22, "correo":"mario14@gmail.com"},
 ]
 #ruta o Endpoint
 @app.get("/", tags=['Inicio'])
@@ -18,26 +27,26 @@ def main():
     return{"message": "!Bienvenido a FasAPI!"}
 
 #Endpoint CONSULTA TODOS
-@app.get('/todosUsuario', tags=['Operaciones CRUD'])
+@app.get('/todosUsuario', response_model=list[modelUsuario], tags=['Operaciones CRUD'])
 def leer():
-    return {'Usuarios Registrados' : usuarios }
+    return  usuarios 
 
 #Endpoint POST
-@app.post('/usuarios/', tags=['Operaciones CRUD'])
-def guardar(usuario:dict):
+@app.post('/usuarios/',response_model=list[modelUsuario], tags=['Operaciones CRUD'])
+def guardar(usuario:modelUsuario):
     for usr in usuarios:
-        if usr['id'] == usuario.get("id"):
+        if usr['id'] == usuario.id :
             raise HTTPException(status_code=400,detail="El usuario ya existe")
     
     usuarios.append(usuario)
     return usuarios
 
 #Endpoint para actualizar
-@app.put('/usuarios/{id}',tags=['Operaciones CRUD'])
-def actualizar(id:int, usuarioActualizado:dict): 
+@app.put('/usuarios/{id}' ,response_model=modelUsuario,tags=['Operaciones CRUD'])
+def actualizar(id:int, usuarioActualizado:modelUsuario): 
     for index, usr in enumerate(usuarios):
         if usr["id"] == id:
-            usuarios[index].update(usuarioActualizado)
+            usuarios[index]=usuarioActualizado.model_dump()
             return usuarios[index]
     raise HTTPException(status_code=404, detail="El usuario no existe")
 
