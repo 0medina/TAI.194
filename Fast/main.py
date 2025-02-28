@@ -1,7 +1,7 @@
 from fastapi import FastAPI,HTTPException
 from typing import Optional,List # define para que los caracteres en las api sean opcionales o no
-from models import modelUsuario
-
+from models import modelUsuario, modelAuth
+from genToken import createToken
 
 
 
@@ -21,6 +21,17 @@ usuarios=[
 @app.get("/", tags=['Inicio'])
 def main():
     return{"message": "!Bienvenido a FasAPI!"}
+
+#endpoints  para generar tokens
+@app.post('/auth', tags=['Autentificacion'])
+def auth (credenciales:modelAuth):
+    if credenciales.mail == 'estela@example.com' and credenciales.passw == '123456789':
+        token:str= createToken(credenciales.model_dump())
+        print (token)
+        return {"Aviso":"Token generado"}
+    else:
+        return {"Aviso":"Usuario no cuenta con permiso"}
+            
 
 #Endpoint CONSULTA TODOS
 @app.get('/todosUsuario', response_model=list[modelUsuario], tags=['Operaciones CRUD'])

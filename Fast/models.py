@@ -9,4 +9,4 @@ class modelUsuario(BaseModel):
 
 class modelAuth(BaseModel):
     mail: EmailStr
-    nombre: str = Field(..., min_length=8, strip_whitespace=True, description="Solo letras sin espacios minimo 8.")
+    passw : str = Field(..., min_length=8, strip_whitespace=True, description="Solo letras sin espacios minimo 8.")
