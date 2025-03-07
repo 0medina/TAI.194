@@ -1,7 +1,10 @@
-from fastapi import FastAPI,HTTPException
+from fastapi import FastAPI,HTTPException, Depends
+from fastapi.responses import JSONResponse
 from typing import Optional,List # define para que los caracteres en las api sean opcionales o no
 from models import modelUsuario, modelAuth
 from genToken import createToken
+from middlewares import BearerJWT
+
 
 
 
@@ -28,13 +31,13 @@ def auth (credenciales:modelAuth):
     if credenciales.mail == 'estela@example.com' and credenciales.passw == '123456789':
         token:str= createToken(credenciales.model_dump())
         print (token)
-        return {"Aviso":"Token generado"}
+        return JSONResponse(content={"Token": token})
     else:
-        return {"Aviso":"Usuario no cuenta con permiso"}
+        return {"Aviso":"Usuario no autorizado"}
             
 
 #Endpoint CONSULTA TODOS
-@app.get('/todosUsuario', response_model=list[modelUsuario], tags=['Operaciones CRUD'])
+@app.get('/todosUsuario', dependencies=[Depends(BearerJWT())],response_model=list[modelUsuario], tags=['Operaciones CRUD'])
 def leer():
     return  usuarios 
 
