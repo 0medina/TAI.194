@@ -5,9 +5,6 @@ from models import modelUsuario, modelAuth
 from genToken import createToken
 from middlewares import BearerJWT
 
-
-
-
 app = FastAPI(
     title="Mi primera API",
     description="Blanca estela medina nieves",
