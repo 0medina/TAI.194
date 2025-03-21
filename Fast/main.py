@@ -1,15 +1,20 @@
 from fastapi import FastAPI,HTTPException, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional,List # define para que los caracteres en las api sean opcionales o no
-from models import modelUsuario, modelAuth
+from modelsPydantic import modelUsuario, modelAuth
 from genToken import createToken
 from middlewares import BearerJWT
+from DB.conexion import Session, engine, Base
+from models.modelsDB import User
 
 app = FastAPI(
     title="Mi primera API",
     description="Blanca estela medina nieves",
     version="1.0.1"
 )
+
+Base.metadata.create_all(bind= engine)
+
     
 usuarios=[
     {"id":1, "nombre":"estela", "edad":22, "correo":"estela123@gmail.com"},
@@ -39,15 +44,21 @@ def leer():
     return  usuarios 
 
 #Endpoint POST
-@app.post('/usuarios/',response_model=list[modelUsuario], tags=['Operaciones CRUD'])
+@app.post('/usuarios/',response_model=modelUsuario, tags=['Operaciones CRUD'])
 def guardar(usuario:modelUsuario):
-    for usr in usuarios:
-        if usr['id'] == usuario.id :
-            raise HTTPException(status_code=400,detail="El usuario ya existe")
+    db=Session()
+    try:
+        db.add( User(**usuario.model_dump()))
+        db.commit()
+        return JSONResponse(status_code=201, content={"message": "usuario Guardado", "usuario": usuario.model_dump()})
     
-    usuarios.append(usuario)
-    return usuarios
-
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"message": "Mo fue posible guardar", "Error": str(e)})
+    
+    finally:
+        db.close()       
+        
 #Endpoint para actualizar
 @app.put('/usuarios/{id}' ,response_model=modelUsuario,tags=['Operaciones CRUD'])
 def actualizar(id:int, usuarioActualizado:modelUsuario): 
