@@ -1,5 +1,6 @@
 from fastapi import FastAPI,HTTPException, Depends
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from typing import Optional,List # define para que los caracteres en las api sean opcionales o no
 from modelsPydantic import modelUsuario, modelAuth
 from genToken import createToken
@@ -39,10 +40,20 @@ def auth (credenciales:modelAuth):
             
 
 #Endpoint CONSULTA TODOS
-@app.get('/todosUsuario', dependencies=[Depends(BearerJWT())],response_model=list[modelUsuario], tags=['Operaciones CRUD'])
+@app.get('/todosUsuario',tags=['Operaciones CRUD'])
 def leer():
-    return  usuarios 
-
+   db=Session()
+   try:
+       consulta=db.query(User).all()
+       return JSONResponse(content= jsonable_encoder(consulta))
+   
+   except Exception as e:
+       db.rollback()
+       return JSONResponse(status_code=500, content={"message": "No fue posible consultar", "Error": str(e)})
+   finally:
+       db.close()
+   
+   
 #Endpoint POST
 @app.post('/usuarios/',response_model=modelUsuario, tags=['Operaciones CRUD'])
 def guardar(usuario:modelUsuario):
@@ -68,6 +79,7 @@ def actualizar(id:int, usuarioActualizado:modelUsuario):
             return usuarios[index]
     raise HTTPException(status_code=404, detail="El usuario no existe")
 
+#endopint busca para borrar 
 @app.delete('/usuarios/{id}',tags=['Operaciones CRUD'])
 def eliminar(id:int): 
     for index, usr in enumerate(usuarios):
@@ -76,3 +88,21 @@ def eliminar(id:int):
              return usuarios[index]
     raise HTTPException(status_code=404, detail="El usuario que buscas no existe ")
 
+#Endpoint Para buscar por ID
+@app.get('/usuarios/{id}',tags=['Operaciones CRUD'])
+def leeruno(id:int):
+    db=Session()
+    try:
+        consulta=db.query(User).filter(User.id==id).first()
+        if not consulta:
+            return JSONResponse(status_code=404, content={"mensaje": "Usuario mo encontrado"})
+        
+        return JSONResponse(content=jsonable_encoder(consulta))
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"message": "Mo fue posible guardar", "Error": str(e)})
+    
+    finally:
+        db.close()       
+        
+                                
