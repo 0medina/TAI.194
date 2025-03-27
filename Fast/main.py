@@ -16,7 +16,6 @@ app = FastAPI(
 
 Base.metadata.create_all(bind= engine)
 
-    
 usuarios=[
     {"id":1, "nombre":"estela", "edad":22, "correo":"estela123@gmail.com"},
     {"id":2, "nombre":"Carlos", "edad":20, "correo":"charly34@gmail.com"},
@@ -38,7 +37,6 @@ def auth (credenciales:modelAuth):
     else:
         return {"Aviso":"Usuario no autorizado"}
             
-
 #Endpoint CONSULTA TODOS
 @app.get('/todosUsuario',tags=['Operaciones CRUD'])
 def leer():
@@ -53,8 +51,7 @@ def leer():
    finally:
        db.close()
    
-   
-#Endpoint POST
+#Endpoint para guardar post
 @app.post('/usuarios/',response_model=modelUsuario, tags=['Operaciones CRUD'])
 def guardar(usuario:modelUsuario):
     db=Session()
@@ -71,22 +68,41 @@ def guardar(usuario:modelUsuario):
         db.close()       
         
 #Endpoint para actualizar
-@app.put('/usuarios/{id}' ,response_model=modelUsuario,tags=['Operaciones CRUD'])
-def actualizar(id:int, usuarioActualizado:modelUsuario): 
-    for index, usr in enumerate(usuarios):
-        if usr["id"] == id:
-            usuarios[index]=usuarioActualizado.model_dump()
-            return usuarios[index]
-    raise HTTPException(status_code=404, detail="El usuario no existe")
-
-#endopint busca para borrar 
-@app.delete('/usuarios/{id}',tags=['Operaciones CRUD'])
-def eliminar(id:int): 
-    for index, usr in enumerate(usuarios):
-        if usr["id"] == id:
-             usuarios.pop(index)
-             return usuarios[index]
-    raise HTTPException(status_code=404, detail="El usuario que buscas no existe ")
+@app.put('/usuarios/{id}', response_model=modelUsuario, tags=['Operaciones CRUD'])
+def actualizar(id: int, usuarioActualizado: modelUsuario):
+    db = Session()
+    try:
+        usuario = db.query(User).filter(User.id == id).first()
+        if usuario:
+            for key, value in usuarioActualizado.model_dump().items():
+                setattr(usuario, key, value)
+            db.commit()
+            return JSONResponse(status_code=201, content={"message": "usuario actualizado", "usuario": usuario.model_dump()})
+    
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"message": "Mo fue posible actualizar", "Error": str(e)})
+    
+    finally:
+        db.close()  
+        
+#endopint busca para eliminar 
+@app.delete('/usuarios/{id}', tags=['Operaciones CRUD'])
+def eliminar(id: int):
+    db = Session()
+    try:
+        usuario = db.query(User).filter(User.id == id).first()
+        if usuario:
+            db.delete(usuario)
+            db.commit()
+            return JSONResponse(status_code=201, content={"message": "usuario eliminado", "usuario": usuario.model_dump()})
+    
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"message": "Mo fue posible eliminar", "Error": str(e)})
+    
+    finally:
+        db.close() 
 
 #Endpoint Para buscar por ID
 @app.get('/usuarios/{id}',tags=['Operaciones CRUD'])
@@ -105,4 +121,3 @@ def leeruno(id:int):
     finally:
         db.close()       
         
-                                
