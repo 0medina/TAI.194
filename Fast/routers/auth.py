@@ -14,3 +14,5 @@ def auth (credenciales:modelAuth):
         return JSONResponse(content={"Token": token})
     else:
         return {"Aviso":"Usuario no autorizado"}
+    
+    
